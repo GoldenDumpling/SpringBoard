@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.zerock.mapper.PostMapper">
+<!-- 게시글 목록 불러오기 -->
+<select id="getList" resultType="org.zerock.domain.PostVO">
+    SELECT post_id, user_id, title, content, created_at, updated_at, readcount
+    FROM Posts
+    ORDER BY post_id DESC
+</select>
+
+<!-- 게시글 전체 개수 조회 -->
+<select id="getTotalCount" resultType="int">
+    SELECT COUNT(*) FROM Posts
+</select>
+
+<!-- 페이지별 게시글 목록 조회 -->
+<select id="getPaginatedPosts" parameterType="int" resultType="org.zerock.domain.PostVO">
+SELECT * FROM (
+    SELECT p.post_id, p.user_id, p.title, p.content, p.created_at, p.updated_at, p.readcount, p.likes ,u.username,
+           ROW_NUMBER() OVER (ORDER BY p.post_id DESC) AS Rnum
+    FROM Posts p
+    JOIN Users u ON p.user_id = u.user_id
+) WHERE Rnum BETWEEN #{start} AND #{end}
+</select>
+
+<!-- 게시글 상세 조회 -->
+<select id="read" resultType="org.zerock.domain.PostVO">
+    SELECT p.post_id, p.user_id, p.title, p.content, p.created_at, p.updated_at, p.readcount, u.username, p.likes
+    FROM Posts p
+    JOIN Users u ON p.user_id = u.user_id
+    WHERE p.post_id = #{post_id}
+</select>
+
+<!-- 게시글 생성 -->
+<insert id="insertSelectKey">
+    <selectKey keyProperty="post_id" resultType="Long" order="BEFORE">
+        SELECT posts_seq.NEXTVAL FROM dual
+    </selectKey>
+    INSERT INTO Posts (post_id, user_id, title, content, created_at, readcount)
+    VALUES (#{post_id}, #{user_id}, #{title}, #{content}, SYSDATE, 0)
+</insert>
+
+<!-- 게시글 수정 -->
+<update id="update">
+    UPDATE Posts
+    SET title = #{title},
+        content = #{content},
+        updated_at = SYSDATE
+    WHERE post_id = #{post_id}
+</update>
+
+
+<!-- 게시글 삭제 -->
+<delete id="delete">
+    DELETE FROM Posts
+    WHERE post_id = #{post_id}
+</delete>
+
+
+<!-- 추천수 증가 -->
+<update id="increaseLikes">
+	UPDATE Posts
+	SET likes = likes + 1
+	WHERE post_id = #{post_id}
+</update>
+
+<!-- 추천수 조회 -->
+<select id="getLikes" resultType="Long">
+	select likes from posts where post_id = #{post_id}
+</select>
+
+
+<!-- 검색 -->
+<select id="searchPosts" resultType="org.zerock.domain.PostVO">
+  SELECT *
+  FROM (
+    SELECT p.post_id, p.user_id, p.title, p.content, p.created_at, p.updated_at, p.readcount, p.likes, u.username,
+           ROW_NUMBER() OVER (ORDER BY p.post_id DESC) AS Rnum
+    FROM Posts p
+    JOIN Users u ON p.user_id = u.user_id
+    WHERE 1 = 1
+    <if test="searchType != null and searchValue != null">
+      AND (
+        (#{searchType} = 'all' AND (p.title LIKE '%' || #{searchValue} || '%' OR u.username LIKE '%' || #{searchValue} || '%'))
+        OR (#{searchType} = 'title' AND p.title LIKE '%' || #{searchValue} || '%')
+        OR (#{searchType} = 'author' AND u.username LIKE '%' || #{searchValue} || '%')
+      )
+    </if>
+  )
+  WHERE Rnum BETWEEN #{start} AND #{end}
+</select>
+
+<!-- 검색 갯수 조회 -->
+<select id="getSearchCount" resultType="int">
+    SELECT COUNT(*)
+    FROM Posts p
+    JOIN Users u ON p.user_id = u.user_id
+    WHERE 1 = 1
+    <if test="searchType != null and searchValue != null">
+        AND (
+            (#{searchType} = 'all' AND (p.title LIKE '%' || #{searchValue} || '%' OR u.username LIKE '%' || #{searchValue} || '%'))
+            OR (#{searchType} = 'title' AND p.title LIKE '%' || #{searchValue} || '%')
+            OR (#{searchType} = 'author' AND u.username LIKE '%' || #{searchValue} || '%')
+        )
+    </if>
+</select>
+
+
+<!-- 조회수 증가 -->
+<update id="increaseReadCount">
+    UPDATE Posts
+    SET readcount = readcount + 1
+    WHERE post_id = #{postId}
+</update>
+
+
+</mapper>
