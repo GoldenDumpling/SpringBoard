@@ -255,6 +255,9 @@
       .modal-button:hover {
           background-color: #45a049;
       }
+      .cke_contents {
+        height: 600px !important; /* 원하는 높이 값으로 변경 */
+      }
 </style>
 </head>
 <body>
