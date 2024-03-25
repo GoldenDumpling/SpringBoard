@@ -9,9 +9,13 @@ import org.zerock.domain.PostVO;
 
 import lombok.extern.log4j.Log4j;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("file:src/main/webapp/WEB-INF/spring/root-context.xml")
@@ -45,6 +49,8 @@ public class PostMapperTests {
         post.setUser_id(3L); 
         post.setTitle("글 제목");
         post.setContent("글 내용");
+        post.setFile_uuid(UUID.randomUUID().toString());
+        post.setFile_type("image/png");
         mapper.insertSelectKey(post);
         log.info(post);
     }
@@ -58,11 +64,16 @@ public class PostMapperTests {
     @Test
     public void testUpdate() {
         PostVO post = new PostVO();
-        post.setPost_id(1L); 
+        post.setPost_id(127L); 
         post.setTitle("수정 글 제목");
         post.setContent("수정 글 내용");
+        post.setFile_uuid(UUID.randomUUID().toString()); 
+        post.setFile_type("image/jpeg"); 
         int count = mapper.update(post);
         log.info("Update Count: " + count);
+
+        assertNotNull(count);
+        assertTrue(count > 0); // 업데이트된 레코드 수가 0보다 큰지 확인합니다.
     }
     
     @Test

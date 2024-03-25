@@ -8,25 +8,53 @@
         <result property="password" column="password" />
         <result property="email" column="email" />
         <result property="createdAt" column="created_at" />
+        <result property="confirmed" column="confirmed" />
+        <result property="confirmationToken" column="confirmation_token" />
     </resultMap>
 
     <!-- 회원가입 (사용자 생성) -->
-	<insert id="insertUser">
-	    <selectKey keyProperty="user_id" resultType="Long" order="BEFORE">
-	        SELECT users_seq.NEXTVAL FROM dual
-	    </selectKey>
-	    INSERT INTO Users (user_id, username, password, email, created_at)
-	    VALUES (#{user_id}, #{username}, #{password}, #{email}, SYSDATE)
-	</insert>
+    <insert id="insertUser">
+        <selectKey keyProperty="user_id" resultType="Long" order="BEFORE">
+            SELECT users_seq.NEXTVAL FROM dual
+        </selectKey>
+        INSERT INTO Users (user_id, username, password, email, created_at, confirmed, confirmation_token)
+        VALUES (#{user_id}, #{username}, #{password}, #{email}, SYSDATE, 'N', #{confirmation_token})
+    </insert>
 
+    <!-- 이메일 인증 -->
+    <update id="confirmUser">
+        UPDATE Users SET confirmed = 'Y' WHERE confirmation_token = #{confirmation_token}
+    </update>
 
     <!-- 사용자 비밀번호 조회 -->
     <select id="getPasswordByUsername" resultType="string">
         SELECT password FROM Users WHERE username = #{username}
     </select>
-    
+
     <!-- 사용자 ID번호 조회 -->
     <select id="getIdByUsername" resultType="Long">
         SELECT user_id FROM Users WHERE username = #{username}
     </select>
+
+    <!-- 인증 토큰으로 사용자 조회 -->
+    <select id="getUserByToken" resultType="org.zerock.domain.UserVO">
+        SELECT * FROM Users WHERE confirmation_token = #{confirmation_token}
+    </select>
+    
+    <!-- 사용자 이름으로 사용자 조회 -->
+	<select id="getUserByUsername" resultType="org.zerock.domain.UserVO">
+	    SELECT * FROM Users WHERE username = #{username}
+	</select>
+	
+	
+    <update id="updateUser" parameterType="org.zerock.domain.UserVO">
+       UPDATE Users
+       SET 
+           username = #{username},
+           password = #{password},
+           email = #{email},
+           confirmed = #{confirmed},
+           confirmation_token = #{confirmation_token}
+       WHERE user_id = #{user_id}
+    </update>
 </mapper>

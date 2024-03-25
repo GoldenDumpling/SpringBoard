@@ -11,5 +11,6 @@ public class UserVO {
 	private String password;
 	private String email;
 	private Date created_at;
-
+    private String confirmed; // 이메일 인증 여부
+    private String confirmation_token; // 이메일 인증 토큰
 }

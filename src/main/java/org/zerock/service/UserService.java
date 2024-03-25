@@ -3,16 +3,28 @@ package org.zerock.service;
 import org.zerock.domain.UserVO;
 
 public interface UserService {
-    // 회원가입 (사용자 생성)
-    public void insertUser(UserVO user);
 
-    // 사용자 비밀번호 조회
-    public String getPasswordByUsername(String username);
+    // 사용자 추가
+    void insertUser(UserVO user);
+
+    // 사용자 이름으로 비밀번호 조회
+    String getPasswordByUsername(String username);
+
+    // 사용자 이름으로 사용자 ID 조회
+    Long getIdByUsername(String username);
+
+    // 사용자 정보 업데이트
+    void updateUser(UserVO user);
+
+    // 인증 토큰으로 사용자 조회
+    UserVO getUserByToken(String confirmationToken);
+
+    // 사용자 이름으로 사용자 조회
+    UserVO getUserByUsername(String username);
+
+    // 사용자 이메일 인증
+    boolean confirmUser(String confirmationToken); 
     
-    // 사용자 아이디번호 조회
-    public Long getIdByUsername(String username);
-    
-    // 아이디 중복 체크
-    public boolean isUsernameDuplicate(String username);
-    
+    // 중복 체크 메서드 추가
+    boolean isUsernameDuplicate(String username); 
 }

@@ -15,5 +15,7 @@ public class PostVO {
 	private Long readcount;
 	private Long likes;
 	private String username;
-	
+	private String file_uuid; 
+    private String file_type; 
+    private String originalFileName;
 }

@@ -27,7 +27,7 @@ SELECT * FROM (
 
 <!-- 게시글 상세 조회 -->
 <select id="read" resultType="org.zerock.domain.PostVO">
-    SELECT p.post_id, p.user_id, p.title, p.content, p.created_at, p.updated_at, p.readcount, u.username, p.likes
+    SELECT p.post_id, p.user_id, p.title, p.content, p.created_at, p.updated_at, p.readcount, u.username, p.likes, p.file_uuid, p.file_type, p.originalfilename
     FROM Posts p
     JOIN Users u ON p.user_id = u.user_id
     WHERE p.post_id = #{post_id}
@@ -38,8 +38,8 @@ SELECT * FROM (
     <selectKey keyProperty="post_id" resultType="Long" order="BEFORE">
         SELECT posts_seq.NEXTVAL FROM dual
     </selectKey>
-    INSERT INTO Posts (post_id, user_id, title, content, created_at, readcount)
-    VALUES (#{post_id}, #{user_id}, #{title}, #{content}, SYSDATE, 0)
+    INSERT INTO Posts (post_id, user_id, title, content, created_at, file_uuid, file_type, readcount, likes, originalFileName)
+    VALUES (#{post_id}, #{user_id}, #{title}, #{content}, SYSDATE, #{file_uuid}, #{file_type}, 0, 0, #{originalFileName})
 </insert>
 
 <!-- 게시글 수정 -->
@@ -47,7 +47,10 @@ SELECT * FROM (
     UPDATE Posts
     SET title = #{title},
         content = #{content},
-        updated_at = SYSDATE
+        updated_at = SYSDATE,
+        file_uuid = #{file_uuid},
+        file_type = #{file_type},
+        originalFileName = #{originalFileName}
     WHERE post_id = #{post_id}
 </update>
 

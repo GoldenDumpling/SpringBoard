@@ -196,7 +196,34 @@
 			 <artifactId>jackson-databind</artifactId>
 			 <version>2.9.4</version>
 		</dependency>
+		<!-- Apache Commons FileUpload -->
+		<dependency>
+		    <groupId>commons-fileupload</groupId>
+		    <artifactId>commons-fileupload</artifactId>
+		    <version>1.4</version> <!-- 사용 가능한 최신 버전으로 확인 -->
+		</dependency>
+				
+		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-mail -->
+		<dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-starter-mail</artifactId>
+		    <version>2.4.13</version>
+		</dependency>
+
+
+		<!-- Java Mail API -->
+		<dependency>
+		    <groupId>javax.mail</groupId>
+		    <artifactId>javax.mail-api</artifactId>
+		    <version>1.6.2</version>
+		</dependency>
 		
+		<!-- Spring Framework의 메일 지원 -->
+		<dependency>
+		    <groupId>org.springframework</groupId>
+		    <artifactId>spring-context-support</artifactId>
+		    <version>5.0.7.RELEASE</version> <!-- 버전은 프로젝트의 Spring 버전과 일치시켜야 합니다 -->
+		</dependency>
 		
 	</dependencies>
     <build>

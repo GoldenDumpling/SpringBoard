@@ -209,7 +209,7 @@
 .modal {
        display: none;
        position: fixed;
-       z-index: 1;
+       z-index: 100;
        left: 0;
        top: 0;
        width: 100%;
@@ -255,14 +255,20 @@
       .modal-button:hover {
           background-color: #45a049;
       }
+      .cke_contents {
+        height: 600px !important; /* 원하는 높이 값으로 변경 */
+      }
+      .comment_content {
+	    white-space: pre-wrap; /* 공백, 줄바꿈을 그대로 유지 */
+	  }
 </style>
 </head>
 <body>
 <div class="container">
 	<c:choose>
-	    <c:when test="${editMode or writeMode}"> <!-- editMode와 writeMode 모두 동일한 폼을 사용 -->
-	        <form id="postForm" method="post" action="/post/${editMode ? 'update' : 'write'}"> <!-- action 속성 분기 처리 -->
-	            <c:if test="${editMode}">
+	    <c:when test="${editMode or writeMode}">
+	        <form id="postForm" method="post" action="/post/${editMode ? 'update' : 'write'}" enctype="multipart/form-data">
+   	            <c:if test="${editMode}">
 	                <input type="hidden" name="post_id" value="${post.post_id}">
 	            </c:if>
 	            <div class="mb-3">
@@ -276,6 +282,16 @@
 	            <script>
 	                CKEDITOR.replace('editor');
 	            </script>
+				<div class="mb-3">
+				    <label for="file" class="form-label">사진 및 파일첨부</label>
+				    <input type="file" class="form-control" id="file" name="file">
+				    <c:if test="${editMode && post.file_uuid != null && post.originalFileName != null}">
+				        <div class="mt-2">
+				            <span>현재 첨부된 파일: </span>
+				            <a href="/post/uploads/${post.file_uuid}?originalFileName=${post.originalFileName}" download="${post.originalFileName}">${post.originalFileName}</a>
+				        </div>
+				    </c:if>
+				</div>
 	        </form>
 	    </c:when>
 	    <c:otherwise>
@@ -287,8 +303,14 @@
 	        <div class="context_container">
 	            <p>${post.content}</p>
 	        </div>
+			<c:if test="${post.file_uuid != null and post.originalFileName != null}"> <!-- 파일이 존재하는지 확인 -->
+			    <div class="file-download">
+			        <a href="/post/uploads/${post.file_uuid}?originalFileName=${post.originalFileName}" download="${post.originalFileName}">${post.originalFileName}</a>
+			    </div>
+			</c:if>
 	    </c:otherwise>
 	</c:choose>
+
     <div class="button-container">
         <c:if test="${not (editMode or writeMode)}"> <!-- 상세보기 모드에서만 좋아요 버튼 표시 -->
             <div class="like-btn-container">
@@ -368,7 +390,7 @@
                 <c:if test="${not empty username}">
                     <tr>
                         <td colspan="2">
-                            <textarea id="newCommentContent" rows="3" style="width: 100%; resize: none;"></textarea>
+                            <textarea class="comment_content" id="newCommentContent" rows="3" style="width: 100%; resize: none;"></textarea>
                         </td>
                     </tr>
                     <tr>

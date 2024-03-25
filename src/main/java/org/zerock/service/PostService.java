@@ -1,7 +1,9 @@
 package org.zerock.service;
 
+import java.io.IOException;
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
 import org.zerock.domain.PostVO;
 
 public interface PostService {
@@ -40,4 +42,11 @@ public interface PostService {
 	
 	// 검색 갯수
 	int getSearchCount(String searchType, String searchValue);
+
+    // 파일과 함께 게시글 저장
+    void savePostWithFile(PostVO post, MultipartFile file) throws IOException;
+
+    // 게시글 업데이트 시 파일 처리 포함
+    void updatePostWithFile(PostVO post, MultipartFile file) throws IOException;
+
 }

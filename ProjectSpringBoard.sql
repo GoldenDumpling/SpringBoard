@@ -26,11 +26,14 @@
 -- 유저 테이블 create
 CREATE TABLE Users (
     user_id NUMBER PRIMARY KEY,
-    username VARCHAR2(50) NOT NULL unique,
+    username VARCHAR2(50) NOT NULL UNIQUE,
     password VARCHAR2(50) NOT NULL,
     email VARCHAR2(100),
-    created_at DATE DEFAULT SYSDATE
+    created_at DATE DEFAULT SYSDATE,
+    confirmed CHAR(1) DEFAULT 'N', -- 이메일 인증 여부
+    confirmation_token VARCHAR2(256) -- 이메일 인증 토큰
 );
+
 --유저 시퀀스
 CREATE SEQUENCE users_seq START WITH 1 INCREMENT BY 1;
 --테이블 삭제
@@ -38,8 +41,8 @@ drop table users;
 drop SEQUENCE users_seq;
 
 -- INSERT
-INSERT INTO Users (user_id, username, password, email, created_at)
-VALUES (users_seq.NEXTVAL, 'zig5', '1234', 'email@example.com', SYSDATE);
+INSERT INTO Users (user_id, username, password, email, created_at, email_verified, verification_token)
+VALUES (users_seq.NEXTVAL, 'zig5', '1234', 'email@example.com', SYSDATE, 1, '1111');
 
 -- UPDATE
 UPDATE Users
@@ -71,8 +74,18 @@ CREATE TABLE Posts (
     created_at DATE DEFAULT SYSDATE,
     updated_at DATE,
     readcount NUMBER DEFAULT 0,
-    likes NUMBER DEFAULT 0
+    likes NUMBER DEFAULT 0,
+    file_uuid VARCHAR2(200) DEFAULT NULL,
+    file_type VARCHAR2(50) DEFAULT NULL,
+    originalFileName VARCHAR2(255) DEFAULT NULL
 );
+
+--파일경로 추가
+ALTER TABLE Posts ADD (
+    file_uuid VARCHAR2(200),
+    file_type VARCHAR2(50)
+);
+
 
 
 -- 게시글 시퀀스
@@ -82,23 +95,26 @@ drop table Posts;
 
 
 -- INSERT
-INSERT INTO Posts (post_id, user_id, title, content, created_at, updated_at)
-VALUES (posts_seq.NEXTVAL, 3, 'Title of the post', 'Content of the post', SYSDATE, NULL);
+INSERT INTO Posts (post_id, user_id, title, content, created_at, updated_at, readcount, likes, file_uuid, file_type, originalFileName)
+VALUES (posts_seq.NEXTVAL, 3, 'Title of the post', 'Content of the post', SYSDATE, NULL, 0, 0, NULL, NULL, NULL);
 
 -- UPDATE
 UPDATE Posts
 SET title = 'Updated title', content = 'Updated content', updated_at = SYSDATE
 WHERE post_id = 1;
 
+
 -- DELETE
 DELETE FROM Posts
 WHERE post_id = 3;
 
 -- 게시글 상세읽기
-SELECT p.post_id, p.user_id, p.title, p.content, p.created_at, p.updated_at, p.readcount, u.username, p.likes
-    FROM Posts p
-    JOIN Users u ON p.user_id = u.user_id
-    WHERE p.post_id = 3;
+
+SELECT p.post_id, p.user_id, p.title, p.content, p.created_at, p.updated_at, p.readcount, u.username, p.likes, p.file_uuid, p.file_type, p.originalfilename
+FROM Posts p
+JOIN Users u ON p.user_id = u.user_id
+WHERE p.post_id = 166;
+
 
 --SELECT 
 SELECT * from posts;
@@ -204,5 +220,5 @@ ORDER BY c.created_at ASC;
 --제약사항보기
 SELECT * FROM USER_CONSTRAINTS WHERE TABLE_NAME = 'POSTS';
 
-
+ROLLBACK;
 commit;

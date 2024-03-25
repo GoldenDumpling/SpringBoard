@@ -1,9 +1,16 @@
 package org.zerock.controller;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +23,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.zerock.domain.CommentVO;
 import org.zerock.domain.PostVO;
@@ -52,7 +60,6 @@ public class PostController {
 	    log.info("startRow : " + start);
 	    log.info("endRow : " + end);
 	    List<PostVO> posts = service.getPaginatedPosts(start, end);
-	    log.info(posts);
 	    // 페이징을 위한 번호
 	    int number = count - (currentPage - 1) * pageSize;
 	
@@ -154,32 +161,89 @@ public class PostController {
     }
 
 	@PostMapping("/write")
-	public String write(PostVO post, HttpSession session) {
-	    log.info("글 작성 처리");
+	public String write(PostVO post, @RequestParam(value = "file", required = false)MultipartFile file, HttpSession session) throws IOException {
+	    log.info("글 작성 처리, file is " + (file != null ? "not null" : "null"));
+	    
+	    if (file != null && !file.isEmpty()) {
+	        log.info("Processing file upload...");
+	    }
+	    
 	    
 	    // 세션에서 로그인한 사용자의 user_id를 가져옴
 	    Long userId = (Long) session.getAttribute("user_id");
 	    post.setUser_id(userId);
-	    service.insertSelectKey(post);
+	    service.savePostWithFile(post, file);
 	    return "redirect:/post/list";
 	}
 
 	// 글 수정
 	@PostMapping("/update")
-	public String update(PostVO post) {
-	    log.info("게시글 수정 처리");
-	    service.update(post);
+	public String update(PostVO post, @RequestParam(value = "file", required = false) MultipartFile file, HttpSession session) throws IOException {
+	    log.info("게시글 수정 처리, file is " + (file != null ? "not null" : "null"));
+	    
+	    if (file != null && !file.isEmpty()) {
+	        log.info("Processing file upload for update...");
+	    }
+	    
+	    service.updatePostWithFile(post, file);
 	    return "redirect:/post/detail?post_id=" + post.getPost_id();
 	}
 	
-	//글 삭제
 	@DeleteMapping("delete/{postId}")
 	public ResponseEntity<String> deletePost(@PathVariable Long postId) {
+	    // 삭제할 게시글 정보 조회
+	    PostVO post = service.read(postId);
+
+	    // 게시글에 첨부된 파일이 있는 경우 파일 삭제
+	    if (post.getFile_uuid() != null && !post.getOriginalFileName().isEmpty()) {
+	        String fileExtension = post.getOriginalFileName().substring(post.getOriginalFileName().lastIndexOf("."));
+	        String filePath = "C:/upload/" + post.getFile_uuid() + fileExtension;
+	        File file = new File(filePath);
+
+	        if (file.exists()) {
+	            if (file.delete()) {
+	                log.info("파일 삭제 성공: " + filePath);
+	            } else {
+	                log.warn("파일 삭제 실패: " + filePath);
+	            }
+	        } else {
+	            log.warn("삭제할 파일이 존재하지 않습니다: " + filePath);
+	        }
+	    }
+
 	    // 게시글 삭제 로직 수행
 	    service.delete(postId);
-	    // 삭제 성공 시 응답
-	    return ResponseEntity.ok("게시글이 삭제되었습니다.");
-	}
 
+	    // 삭제 성공 시 응답
+	    return ResponseEntity.ok("게시글과 첨부 파일이 삭제되었습니다.");
+	}
+	
+	@GetMapping("/uploads/{file_uuid}")
+	public void downloadFile(@PathVariable String file_uuid, @RequestParam("originalFileName") String originalFileName, HttpServletResponse response) throws IOException {
+	    String uploadDir = "C:/upload/";
+	    String fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
+	    String filePath = uploadDir + file_uuid + fileExtension;
+	    File file = new File(filePath);
+
+	    if (!file.exists()) {
+	        log.warn("파일이 존재하지 않습니다.");
+	        response.sendError(HttpServletResponse.SC_NOT_FOUND);
+	        return;
+	    }
+
+	    response.setContentType("application/octet-stream");
+	    response.setHeader("Content-Disposition", "attachment; filename=\"" + URLEncoder.encode(originalFileName, "UTF-8") + "\"");
+	    response.setContentLength((int) file.length());
+
+	    try (InputStream in = new FileInputStream(file); OutputStream out = response.getOutputStream()) {
+	        byte[] buffer = new byte[4096];
+	        int bytesRead;
+	        while ((bytesRead = in.read(buffer)) != -1) {
+	            out.write(buffer, 0, bytesRead);
+	        }
+	    } catch (Exception e) {
+	        log.error("파일 전송 중 오류 발생", e);
+	    }
+	}
 }
 	
