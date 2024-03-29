@@ -1,26 +1,31 @@
 --User Table (사용자 테이블)
---
 --user_id: 사용자의 고유 식별자 (기본키)
---username: 사용자 이름
+--username: 사용자 이름 (중복 불가)
 --password: 사용자 비밀번호
 --email: 사용자 이메일
---기타 사용자 관련 정보(성, 이름, 가입 날짜 등)
+--created_at: 사용자 계정 생성 날짜
+--confirmed: 이메일 인증 여부
+--confirmation_token: 이메일 인증 토큰
+
 --Board Table (게시판 테이블)
---
 --post_id: 게시글의 고유 식별자 (기본키)
---user_id: 게시글을 작성한 사용자의 ID (외래키)
+--user_id: 게시글을 작성한 사용자의 ID (Users 테이블의 user_id 외래키)
 --title: 게시글 제목
 --content: 게시글 내용
 --created_at: 게시글 작성 시간
 --updated_at: 게시글 수정 시간
+--readcount: 게시글 조회수
+--likes: 게시글 추천수
+--file_uuid: 첨부파일 UUID
+--file_type: 첨부파일 타입
+--originalFileName: 첨부파일 원본 이름
+
 --Comment Table (댓글 테이블)
---
 --comment_id: 댓글의 고유 식별자 (기본키)
---post_id: 댓글이 달린 게시글의 ID (외래키)
---user_id: 댓글을 작성한 사용자의 ID (외래키)
+--post_id: 댓글이 달린 게시글의 ID (Posts 테이블의 post_id 외래키, 게시글 삭제 시 연쇄 삭제)
+--user_id: 댓글을 작성한 사용자의 ID (Users 테이블의 user_id 외래키)
 --content: 댓글 내용
 --created_at: 댓글 작성 시간
---updated_at: 댓글 수정 시간
 
 -- 유저 SQL문 
 -- 유저 테이블 create
@@ -70,7 +75,7 @@ CREATE TABLE Posts (
     post_id NUMBER PRIMARY KEY,
     user_id NUMBER,
     title VARCHAR2(100) NOT NULL,
-    content VARCHAR2(4000) NOT NULL,
+    content CLOB NOT NULL,
     created_at DATE DEFAULT SYSDATE,
     updated_at DATE,
     readcount NUMBER DEFAULT 0,

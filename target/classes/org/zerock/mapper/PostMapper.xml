@@ -48,9 +48,9 @@ SELECT * FROM (
     SET title = #{title},
         content = #{content},
         updated_at = SYSDATE,
-        file_uuid = #{file_uuid},
-        file_type = #{file_type},
-        originalFileName = #{originalFileName}
+        file_uuid = #{file_uuid,jdbcType=VARCHAR},
+        file_type = #{file_type,jdbcType=VARCHAR},
+        originalFileName = #{originalFileName,jdbcType=VARCHAR}
     WHERE post_id = #{post_id}
 </update>
 

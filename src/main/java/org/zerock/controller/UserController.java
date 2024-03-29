@@ -1,5 +1,6 @@
 package org.zerock.controller;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +64,7 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public String register(UserVO user, RedirectAttributes rttr) {
+    public String register(UserVO user, RedirectAttributes rttr, HttpServletRequest request) {
         log.info("회원가입을 시도합니다. 사용자 정보: " + user);
         
         if (userService.isUsernameDuplicate(user.getUsername())) {
@@ -72,7 +73,7 @@ public class UserController {
             rttr.addFlashAttribute("modalMessage", "이미 존재하는 아이디입니다.");
             return "redirect:/user/register";
         } else {
-            userService.insertUser(user);
+            userService.insertUser(user, request);
             // 회원가입 성공 후 이메일 인증 요청 모달 메시지
             rttr.addFlashAttribute("modalTitle", "회원가입 성공");
             rttr.addFlashAttribute("modalMessage", "회원가입이 완료되었습니다. 이메일을 확인하여 인증을 완료해주세요.");

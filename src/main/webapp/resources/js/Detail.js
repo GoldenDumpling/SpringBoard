@@ -16,7 +16,7 @@ document.addEventListener('click', function(event) {
     }
 });
 
-// 댓글 등록 버튼 - 수정
+// 댓글 등록 버튼
 var addCommentBtn = document.getElementById('addCommentBtn');
 if (addCommentBtn) {
     addCommentBtn.addEventListener('click', function() {
@@ -26,7 +26,7 @@ if (addCommentBtn) {
         }
     });
 }
-
+// 댓글 등록 함수
 function addComment(commentContent, postId, userId, username) {
     var comment = {
         post_id: postId,

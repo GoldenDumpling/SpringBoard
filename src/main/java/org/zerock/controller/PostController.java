@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -218,32 +220,6 @@ public class PostController {
 	    return ResponseEntity.ok("게시글과 첨부 파일이 삭제되었습니다.");
 	}
 	
-	@GetMapping("/uploads/{file_uuid}")
-	public void downloadFile(@PathVariable String file_uuid, @RequestParam("originalFileName") String originalFileName, HttpServletResponse response) throws IOException {
-	    String uploadDir = "C:/upload/";
-	    String fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
-	    String filePath = uploadDir + file_uuid + fileExtension;
-	    File file = new File(filePath);
-
-	    if (!file.exists()) {
-	        log.warn("파일이 존재하지 않습니다.");
-	        response.sendError(HttpServletResponse.SC_NOT_FOUND);
-	        return;
-	    }
-
-	    response.setContentType("application/octet-stream");
-	    response.setHeader("Content-Disposition", "attachment; filename=\"" + URLEncoder.encode(originalFileName, "UTF-8") + "\"");
-	    response.setContentLength((int) file.length());
-
-	    try (InputStream in = new FileInputStream(file); OutputStream out = response.getOutputStream()) {
-	        byte[] buffer = new byte[4096];
-	        int bytesRead;
-	        while ((bytesRead = in.read(buffer)) != -1) {
-	            out.write(buffer, 0, bytesRead);
-	        }
-	    } catch (Exception e) {
-	        log.error("파일 전송 중 오류 발생", e);
-	    }
-	}
+	
 }
 	

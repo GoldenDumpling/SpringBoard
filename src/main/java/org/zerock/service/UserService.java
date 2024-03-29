@@ -1,11 +1,13 @@
 package org.zerock.service;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.zerock.domain.UserVO;
 
 public interface UserService {
 
     // 사용자 추가
-    void insertUser(UserVO user);
+	void insertUser(UserVO user, HttpServletRequest request);
 
     // 사용자 이름으로 비밀번호 조회
     String getPasswordByUsername(String username);

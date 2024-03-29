@@ -12,6 +12,8 @@ import lombok.extern.log4j.Log4j;
 import java.util.Properties;
 import java.util.UUID;
 
+import javax.servlet.http.HttpServletRequest;
+
 @Log4j
 @Service
 public class UserServiceImpl implements UserService {
@@ -36,13 +38,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void insertUser(UserVO user) {
+    public void insertUser(UserVO user, HttpServletRequest request) {
         log.info("사용자를 등록합니다: " + user);
         String confirmationToken = UUID.randomUUID().toString();
         user.setConfirmation_token(confirmationToken);
         mapper.insertUser(user);
-        sendVerificationEmail(user);
+        sendVerificationEmail(user, request);
     }
+
 
     @Override
     public String getPasswordByUsername(String username) {
@@ -80,12 +83,14 @@ public class UserServiceImpl implements UserService {
         return false;
     }
 
-    private void sendVerificationEmail(UserVO user) {
+    private void sendVerificationEmail(UserVO user, HttpServletRequest request) {
+    	String baseUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
+    	
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(user.getEmail());
         message.setSubject("이메일 인증");
         message.setText("이메일 인증을 위해 링크를 클릭하세요: " +
-                        "http://localhost:8092/user/confirm?token=" + user.getConfirmation_token());
+                baseUrl + "/user/confirm?token=" + user.getConfirmation_token());
         mailSender.send(message);
         log.info("인증 이메일 발송: " + user.getEmail());
     }
