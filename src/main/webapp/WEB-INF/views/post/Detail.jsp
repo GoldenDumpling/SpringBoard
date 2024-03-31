@@ -528,7 +528,7 @@
               ]
           },
           // https://ckeditor.com/docs/ckeditor5/latest/features/editor-placeholder.html#using-the-editor-configuration
-          placeholder: 'Welcome to CKEditor 5!',
+          placeholder: '게시글을 입력해주세요.',
           // https://ckeditor.com/docs/ckeditor5/latest/features/font.html#configuring-the-font-family-feature
           fontFamily: {
               options: [
